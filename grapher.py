@@ -6,7 +6,7 @@ from tqdm import tqdm as ProcessBar
 from config import digest_config
 from video_writer import VideoWriter
 from constant import LOW_QUALITY,MID_QUALITY,HIGH_QUALITY
-from rate_func import sigmoid
+from rate_func import sigmoid,linear
 
 class Draw(GraphingTool):
     CONFIG={
@@ -20,6 +20,7 @@ class Draw(GraphingTool):
     'run_time':5,
     'quality':HIGH_QUALITY,
     'data_file':'test.txt',
+    'multiplier':3
     }
     def __init__(self,mode='image',**kwargs):
         digest_config(self,kwargs)
@@ -48,12 +49,12 @@ class Draw(GraphingTool):
             self.args.function=PerametricFunction.functionaize(func)    
             #self.args.lower_limit,self.upper_limit=lower_limit,upper_limit
         else:
-            self.function=PerametricFunction.functionaize(func)
+            self.function=func
 
             
         
     def draw(self,func=None,array_data=False,view=False,save=False):
-        if hasattr(self,"args"):
+        '''if hasattr(self,"args"):
             if self.args.plot:
                 function=Function(self.args.function)
             elif self.args.pera:
@@ -65,7 +66,7 @@ class Draw(GraphingTool):
                 function=self.function
                 #function.setlimit(self.lower_limit,self.upper_limit)
             else:
-                function=func
+                function=func'''
         #function.setlimit(self.lower_limit,self.upper_limit)
         canvas=GraphingTool(self.fmt,self.dir_name,self.file_name)
         canvas.setlimit(self.lower_limit,self.upper_limit)
@@ -79,7 +80,7 @@ class Draw(GraphingTool):
         
         
     def get_number_of_frame(self):
-        return sigmoid(numpy.arange(self.run_time*self.quality))
+        return sigmoid(numpy.arange(self.run_time*self.quality*self.multiplier)/(self.run_time*self.quality))
     
 
     def view_and_write_data_save_all(self):
@@ -100,9 +101,11 @@ class Draw(GraphingTool):
 	    
     def get_movement_video(self,f1,f2):
         writer=VideoWriter(self.video_file)
-        for frame in self.get_number_of_frame():
+        writer.init_video_file(self.get_movement_pixel_array_at_alpha(f1,f2,self.get_number_of_frame()[0]),self.quality)
+        for frame in ProcessBar(self.get_number_of_frame()[1:]):
             writer.start_writing(self.get_movement_pixel_array_at_alpha(f1,f2,frame),self.quality)
         writer.finish_writing()
+        writer.viwe_video(self.video_file)
 	    
 	    
 

@@ -1,4 +1,5 @@
 from numpy import *
+from rate_func import linear
 class PerametricFunction:
     def __init__(self,f1=None,f2=None):
         if f1 is not None and f2 is not None:
@@ -16,6 +17,7 @@ class PerametricFunction:
         def f(x):
             return x**2
         '''
+        print('here',function)
         return lambda x:eval(function)
         
         
@@ -52,6 +54,11 @@ class PerametricFunction:
         self.function_x=PerametricFunction.functionaize(f1)
         self.function_y=PerametricFunction.functionaize(f2)
 
+    def passfunction_x(self,func):
+        self.function_x=func
+
+    def passfunction_y(self,func):
+        self.function_y=func
 
 
     def passfunctions(self,function1,function2):
@@ -60,7 +67,7 @@ class PerametricFunction:
 
     def passfunction(self,function):
         self.function_y=function
-        self.function_x=PerametricFunction.functionaize('x')
+        self.function_x=linear
 
 
     def getfunction(self):
@@ -69,7 +76,7 @@ class PerametricFunction:
 class Function(PerametricFunction):
     def __init__(self,function:str):
         self.setfunction_y(function)
-        self.setfunction_x('x')
+        self.passfunction_x(linear)
 
 class PolarFunction(Function):
     def __init__(self,function:str):
