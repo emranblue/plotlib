@@ -7,19 +7,19 @@ from config import digest_config
 from video_writer import VideoWriter
 from constant import LOW_QUALITY,MID_QUALITY,HIGH_QUALITY
 from rate_func import sigmoid,linear
+from file_tracker import FileManager
 
 class Draw(GraphingTool):
     CONFIG={
-    'data_file':'test.txt',
+    'data_file':'plotlib.txt',
     'function':None,
     'lower_limit':'-5',
     'upper_limit':'5',
-    'video_file':'test.mp4',
+    'video_file':'plotlib',
     'axis':True,
     'grid':True,
-    'run_time':5,
-    'quality':HIGH_QUALITY,
-    'data_file':'test.txt',
+    'run_time':1,
+    'quality':MID_QUALITY,
     'multiplier':3
     }
     def __init__(self,mode='image',**kwargs):
@@ -40,34 +40,35 @@ class Draw(GraphingTool):
                 self.delete()
         elif mode=='video':
             self.fmt='png'
-            self.dir_name='video_dir'
-            self.file_name='temp'
+            self.vfmt='mp4'
+            self.dir_name='plotlib_video'
+            self.file_name=self.video_file
+            
      
     def set_func(self,func,grid=True,axis=True):
         if hasattr(self,"ars"):
             self.args.plot=True
             self.args.function=PerametricFunction.functionaize(func)    
-            #self.args.lower_limit,self.upper_limit=lower_limit,upper_limit
         else:
             self.function=func
 
             
+    def new_video_file_name(self):
+        name=FileManager(self.vfmt,self.dir_name,self.file_name)
+        return name.newfile()
         
     def draw(self,func=None,array_data=False,view=False,save=False):
-        '''if hasattr(self,"args"):
+        if hasattr(self,"args"):
             if self.args.plot:
-                function=Function(self.args.function)
+                self.function=Function(self.args.function)
             elif self.args.pera:
-                function=PerametricFunction(self.args.funtion_x,self.args.function_y)
+                self.function=PerametricFunction(self.args.funtion_x,self.args.function_y)
             elif self.args.polar:
-                function=PolarFunction(self.args.function)
+                self.function=PolarFunction(self.args.function)
         else:
-            if not func:
-                function=self.function
-                #function.setlimit(self.lower_limit,self.upper_limit)
-            else:
-                function=func'''
-        #function.setlimit(self.lower_limit,self.upper_limit)
+            if not func is None:
+                self.function=func
+        #self.function.setlimit(self.lower_limit,self.upper_limit)
         canvas=GraphingTool(self.fmt,self.dir_name,self.file_name)
         canvas.setlimit(self.lower_limit,self.upper_limit)
         canvas.passfunction(self.function)
@@ -89,7 +90,7 @@ class Draw(GraphingTool):
         if os.path.exists(self.data_file):
             os.remove(self.data_file)
         ProcessBar(open(self.data_file,'w').write(str(array_data)))
-        os.system(f'vim {self.data_file}')# vim editor is necessary
+        os.system('vim {}'.format(self.data_file))# vim editor is necessary
 
 	
     def get_combined_func(self,f1:str,f2:str,alpha):
@@ -100,7 +101,7 @@ class Draw(GraphingTool):
 	    return self.draw(array_data=True)
 	    
     def get_movement_video(self,f1,f2):
-        writer=VideoWriter(self.video_file)
+        writer=VideoWriter(self.new_video_file_name())
         writer.init_video_file(self.get_movement_pixel_array_at_alpha(f1,f2,self.get_number_of_frame()[0]),self.quality)
         for frame in ProcessBar(self.get_number_of_frame()[1:]):
             writer.start_writing(self.get_movement_pixel_array_at_alpha(f1,f2,frame),self.quality)

@@ -30,27 +30,30 @@ class GraphingTool(FileManager,PerametricFunction):
         return self.ctx
 
     def __hline__(self,b):
-        self.ctx.set_source_rgb(.2,.8,1)
-        self.ctx.move_to(*self.d2u_p(self.llim,b))
-        self.ctx.line_to(*self.d2u_p(self.rlim,b))
-        self.ctx.set_line_width(2)
-        self.ctx.stroke()
+        ctx=self.getcontext()
+        ctx.set_source_rgb(.2,.8,1)
+        ctx.move_to(*self.d2u_p(self.llim,b))
+        ctx.line_to(*self.d2u_p(self.rlim,b))
+        ctx.set_line_width(2)
+        ctx.stroke()
 
     def __vline__(self,a):
-        self.ctx.set_source_rgb(.2,.8,1)
-        self.ctx.move_to(*self.d2u_p(a,self.dlim))
-        self.ctx.line_to(*self.d2u_p(a,self.ulim))
-        self.ctx.set_line_width(2)
-        self.ctx.stroke() 
+        ctx=self.getcontext()
+        ctx.set_source_rgb(.2,.8,1)
+        ctx.move_to(*self.d2u_p(a,self.dlim))
+        ctx.line_to(*self.d2u_p(a,self.ulim))
+        ctx.set_line_width(2)
+        ctx.stroke() 
 
     def setaxis(self):
-        self.ctx.set_source_rgb(1,1,1)
-        self.ctx.move_to(*self.d2u_p(self.llim,0))
-        self.ctx.line_to(*self.d2u_p(self.rlim,0))
-        self.ctx.move_to(*self.d2u_p(0,self.ulim))
-        self.ctx.line_to(*self.d2u_p(0,self.dlim))
-        self.ctx.set_line_width(5)
-        self.ctx.stroke() 
+        ctx=self.getcontext()
+        ctx.set_source_rgb(1,1,1)
+        ctx.move_to(*self.d2u_p(self.llim,0))
+        ctx.line_to(*self.d2u_p(self.rlim,0))
+        ctx.move_to(*self.d2u_p(0,self.ulim))
+        ctx.line_to(*self.d2u_p(0,self.dlim))
+        ctx.set_line_width(5)
+        ctx.stroke() 
 
     def setgrid(self):
         width=int((self.rlim-self.llim)/self.ratio)

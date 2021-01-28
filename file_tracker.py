@@ -4,8 +4,8 @@ from platform import system
 class FileManager:
     CONFIG={
         "fmt":'png',
-        'dir_name':'fplot_pic',
-        'file_name':'fplot-',
+        'dir_name':'image',
+        'file_name':'plotlib_img',
     }
 
     def __init__(self,fmt,dir_name,file_name,**kwargs):
@@ -70,7 +70,7 @@ class FileManager:
         if system()=='Linux':
             os.system('xdg-open {}'.format(self.file_name))#only available in linux os
         else:
-            print(f"Go to {self.path/self.dir_name}")
+            print("Go to {}".format(self.path/self.dir_name))
 
 
     def removefile(self,name):

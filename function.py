@@ -17,7 +17,6 @@ class PerametricFunction:
         def f(x):
             return x**2
         '''
-        print('here',function)
         return lambda x:eval(function)
         
         
