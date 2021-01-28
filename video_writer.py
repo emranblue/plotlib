@@ -23,7 +23,7 @@ class VideoWriter(object):
             self.vcodec=vcodec
         if not isinstance(pixel_array, np.ndarray):
             pixel_array = np.asarray(pixel_array)
-        width,height,channels = pixel_array.shape
+        width,height,_= pixel_array.shape
         self.process = (
             ffmpeg
                 .input('pipe:', format='rawvideo', pix_fmt='rgb32', s='{}x{}'.format(width, height))
