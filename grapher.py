@@ -18,7 +18,7 @@ class Draw(GraphingTool):
     'video_file':'plotlib',
     'axis':True,
     'grid':True,
-    'run_time':1,
+    'run_time':.25,
     'quality':MID_QUALITY,
     'multiplier':3
     }
@@ -81,7 +81,7 @@ class Draw(GraphingTool):
         
         
     def get_number_of_frame(self):
-        return sigmoid(numpy.arange(self.run_time*self.quality*self.multiplier)/(self.run_time*self.quality))
+        return sigmoid(numpy.arange(int(self.run_time*self.quality*self.multiplier))/(self.run_time*self.quality))
     
 
     def view_and_write_data_save_all(self):
