@@ -5,7 +5,7 @@ class VideoWriter(object):
     #class perpose for writing raw image data to ffmpeg buffer
     CONFIG={
         'video_file':None,
-        'video_dir':'video',
+        'video_dir':'plotlib_video',
         'initial_dir':os.getcwd(),
         'vcodec':'libx264'
     }
@@ -15,6 +15,9 @@ class VideoWriter(object):
         digest_config(self,kwargs)
         self.process=None
         self.video_file=video_file
+            
+            
+    def make_video_dir(self):
         if not os.path.exists(self.video_dir):
             os.mkdir('{}'.format(self.video_dir))
         
@@ -22,6 +25,7 @@ class VideoWriter(object):
     #take numpy array as input then write that array to ffmpeg buffer,
     def init_video_file(self, pixel_array, framerate, vcodec=None):
         os.chdir(self.video_dir)
+        self.make_video_dir()
         if vcodec:
             self.vcodec=vcodec
         if not isinstance(pixel_array, np.ndarray):

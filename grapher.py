@@ -18,9 +18,13 @@ class Draw(GraphingTool):
     'video_file':'plotlib',
     'axis':True,
     'grid':True,
+<<<<<<< HEAD
     'run_time':.25,
+=======
+    'run_time':0.25,
+>>>>>>> refs/remotes/origin/main
     'quality':MID_QUALITY,
-    'multiplier':3
+    'multiplier':6
     }
     def __init__(self,mode='image',**kwargs):
         digest_config(self,kwargs)
@@ -44,6 +48,9 @@ class Draw(GraphingTool):
             self.dir_name='plotlib_video'
             self.file_name=self.video_file
             
+    @staticmethod        
+    def get_full_file(fname,extn='mp4'):
+        return fname+'.'+extn
      
     def set_func(self,func,grid=True,axis=True):
         if hasattr(self,"ars"):
@@ -99,14 +106,19 @@ class Draw(GraphingTool):
     def get_movement_pixel_array_at_alpha(self,f1:str,f2:str,alpha):
 	    self.set_func(self.get_combined_func(f1,f2,alpha),self.lower_limit,self.upper_limit)
 	    return self.draw(array_data=True)
+	 
+    @staticmethod    
+    def get_base_name(fname):
+        return fnmae.split('.')[0]
 	    
     def get_movement_video(self,f1,f2):
-        writer=VideoWriter(self.new_video_file_name())
+        self.video_file=get_base_name(self.new_video_file_name())
+        writer=VideoWriter(get_full_file(self.video_file))
         writer.init_video_file(self.get_movement_pixel_array_at_alpha(f1,f2,self.get_number_of_frame()[0]),self.quality)
         for frame in ProcessBar(self.get_number_of_frame()[1:]):
             writer.start_writing(self.get_movement_pixel_array_at_alpha(f1,f2,frame),self.quality)
         writer.finish_writing()
-        writer.viwe_video(self.video_file)
+        writer.viwe_video(get_full_file(self.video_file))
 	    
 	    
 
