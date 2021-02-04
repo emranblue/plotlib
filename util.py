@@ -4,24 +4,32 @@ from file_tracker import FileManager
 from config import digest_config
 import cairo,os,sys
 from function import PerametricFunction
+from rate_func import linear,gcd
+from constant import size
+from mathlib import all_iso_points
 
 class GraphingTool(FileManager,PerametricFunction):
     CONFIG={
-        'ratio':120,#gcd(1920,1080)=120
+        'ratio':gcd(*size),#gcd(1920,1080)=120
         'step':0.01,
         'rgb':(0.8,.85,0.1),
-        'x0':960,
-        'y0':540,
-        'width':1920,
-        'height':1080,
-        'llim':-960,
-        'rlim':960,
-        'ulim':540,
-        'dlim':-540
+        'x0':int(size[0]/2),
+        'y0':int(size[1]/2),
+        'width':size[0],
+        'height':size[1],
+        'llim':-int(size[0]/2),
+        'rlim':int(size[0]/2),
+        'ulim':int(size[1]/2),
+        'dlim':-int(size[1]/2),
+        'fmt':'png',
+        'dir_name':'temp',
+        'file_name':'temp'
     }
-    def __init__(self,fmt,dir_name,file_name,**kwargs):       
+    def __init__(self,fmt='png',dir_name='temp',file_name='temp.png',**kwargs):       
         digest_config(self,kwargs)
-        super().__init__(fmt,dir_name,file_name)
+        if not [fmt,dir_name,file_name]==[None]*3:
+            self.fmt,self.dir_name,self.file_name=fmt,dir_name,file_name
+        super().__init__(self.fmt,self.dir_name,self.file_name)
 
     def getsurface(self):
         return self.surface
@@ -109,25 +117,29 @@ class GraphingTool(FileManager,PerametricFunction):
 
 
     def circle(self,x,y,size=10):
-        self.ctx.set_source_rgb(.75,.34,.15)
-        self.ctx.arc(*self.d2u_p(x,y),size,0,2*np.pi)    
-        self.ctx.fill()
-        self.ctx.stroke()
+        ctx=self.getcontext()
+        ctx.set_source_rgb(.75,.34,.15)
+        ctx.arc(*self.d2u_p(x,y),size,0,2*np.pi)    
+        ctx.fill()
+        ctx.stroke()
     
     def d2u_r(self,x,y):
         return self.ratio*x,-self.ratio*y
         
-    def d2u_p(self,x,y):
-        return self.ratio*x+self.x0,-self.ratio*y+self.y0
+        
+           
+    def d2u_p(cls,x,y):
+        return cls.ratio*x+cls.x0,-cls.ratio*y+cls.y0
         
     
     
-    def line(self,ctx,x1,y1,x2,y2):
-        self.ctx.set_source_rgb(.85,.147,.75)
-        self.ctx.move_to(*self.d2u_p(x1,y1))
-        self.ctx.line_to(*self.d2u_p(x2,y2))
-        self.ctx.set_line_width(3.8)
-        self.ctx.stroke()
+    def line(self,x1,y1,x2,y2):
+        ctx=self.getcontext()
+        ctx.set_source_rgb(.85,.147,.75)
+        ctx.move_to(*self.d2u_p(x1,y1))
+        ctx.line_to(*self.d2u_p(x2,y2))
+        ctx.set_line_width(3.8)
+        ctx.stroke()
 
     def new2old(self,points,a=None,b=None):
         if a is None and b is None:
@@ -147,18 +159,42 @@ class GraphingTool(FileManager,PerametricFunction):
             points[i,1]-=b
         return points
 
-    def draw(self,points,grid,axis):       
+    def draw(self,points,grid,axis): 
         self.init_canvas()
+        ctx=self.getcontext()
         if grid:
             self.setgrid()
         if axis:
             self.setaxis()    
-        self.ctx.move_to(*points[0])
-        for p in points[1:]:
-            self.ctx.line_to(*p)
-        self.ctx.set_line_width(5)
-        self.ctx.set_source_rgb(*self.rgb)
-        self.ctx.stroke()
+        self.draw_line_though_points(ctx,points)
+        
+         
+    
+    def draw_line_through_points(self,ctx,points):
+        ctx.move_to(self.x0,self.y0)
+        for p in points:
+            ctx.line_to(*p)
+            ctx.move_to(self.x0,self.y0)
+        ctx.set_line_width(5)
+        ctx.set_source_rgb(*self.rgb)
+        ctx.stroke()
+        
+    
+    def join_3D_points(self,points):
+        self.init_canvas()
+        ctx=self.getcontext()
+        self.draw_line_through_points(ctx,all_iso_points(points))
+    
 
     def draw_function(self,f1,f2,a,b,*args):
         self.draw(self.genpoint(f1,f2,a,b),*args)
+ 
+ 
+    def func_to_buffer(self,f1,f2,a,b,*args):
+        self.draw_function(f1,f2,a,b,*args)
+        return self.get_pixel_array()
+   
+   
+    def normal_func_to_buffer(self,func,a,b,*args):
+        return self.func_to_buffer(linear,func,a,b,*args)
+        

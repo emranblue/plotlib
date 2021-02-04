@@ -3,9 +3,9 @@ from config import digest_config
 from platform import system
 class FileManager:
     CONFIG={
-        "fmt":'png',
-        'dir_name':'image',
-        'file_name':'plotlib_img',
+        'fmt':'png',
+        'dir_name':'temp',
+        'file_name':'temp',
     }
 
     def __init__(self,fmt,dir_name,file_name,**kwargs):
