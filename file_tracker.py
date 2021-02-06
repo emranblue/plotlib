@@ -1,5 +1,5 @@
 import os
-from config import digest_config
+from plotlib.config import digest_config
 from platform import system
 class FileManager:
     CONFIG={

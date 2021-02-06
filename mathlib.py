@@ -1,5 +1,5 @@
 import numpy as np
-from rate_func import d2u_p
+from plotlib.rate_func import d2u_p
 
 ISO_PROJECT_METRIX=np.array([[1,-1,0],[1,1,1]])
 

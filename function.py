@@ -1,5 +1,5 @@
 from numpy import *
-from rate_func import linear
+from plotlib.rate_func import linear
 class PerametricFunction:
     def __init__(self,function):
         if function[0]:

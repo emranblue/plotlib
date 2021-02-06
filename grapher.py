@@ -1,13 +1,13 @@
-from parser import get_cli
-from function import PerametricFunction,Function,PolarFunction
-from util import GraphingTool
+from plotlib.parser import get_cli
+from plotlib.function import PerametricFunction,Function,PolarFunction
+from plotlib.util import GraphingTool
 import os,sys,numpy
 from tqdm import tqdm as ProcessBar
-from config import digest_config
-from video_writer import VideoWriter
-from constant import LOW_QUALITY,MID_QUALITY,HIGH_QUALITY
-from rate_func import sigmoid,linear,homotopy_func,slow_down,return_polar
-from file_tracker import FileManager
+from plotlib.config import digest_config
+from plotlib.video_writer import VideoWriter
+from plotlib.constant import LOW_QUALITY,MID_QUALITY,HIGH_QUALITY
+from plotlib.rate_func import sigmoid,linear,homotopy_func,slow_down,return_polar
+from plotlib.file_tracker import FileManager
 
 class Draw(GraphingTool):
     CONFIG={

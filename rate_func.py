@@ -1,5 +1,5 @@
 import numpy as np
-from constant import size
+from plotlib.constant import size
 
 def sigmoid(x):
     return ((2/(1+np.exp(-x)))-1)*10
@@ -10,6 +10,14 @@ def linear(x):
 def map_func_array(func,array):
     if callable(func):
         return np.array(list(map(func,np.array(array))),dtype=object)
+
+
+def cairo_context_to_pixel_array(surface):
+    return np.ndarray(shape=(surface.get_width(),surface.get_height(),4),dtype=np.uint8,buffer=surface.get_data())
+    
+
+def buffer_to_numpy_array(buf,width,height):
+    return np.ndarray(shape=(width,height),dtype=np.uint8,buffer=buf)
 
 
 def gcd(a,b):

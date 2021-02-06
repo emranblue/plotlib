@@ -1,12 +1,12 @@
 import numpy as np
 from numpy.ctypeslib import ndpointer
-from file_tracker import FileManager
-from config import digest_config
+from plotlib.file_tracker import FileManager
+from plotlib.config import digest_config
 import cairo,os,sys
-from function import PerametricFunction
-from rate_func import linear,gcd
-from constant import size
-from mathlib import all_iso_points
+from plotlib.function import PerametricFunction
+from plotlib.rate_func import linear,gcd
+from plotlib.constant import size
+from plotlib.mathlib import all_iso_points
 
 class GraphingTool(FileManager,PerametricFunction):
     CONFIG={

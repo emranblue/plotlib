@@ -1,23 +1,31 @@
 import numpy as np
-import ffmpeg,os
-from config import digest_config
-from util import GraphingTool
+import ffmpeg,os,time,cairo,subprocess
+from plotlib.config import digest_config
+from plotlib.util import GraphingTool
 from tqdm import tqdm as ProcessBar
-from rate_func import map_func_array
+from plotlib.rate_func import map_func_array,cairo_context_to_pixel_array
+from multiprocessing import Process
+from contextlib import redirect_stdout as stout
+
+
 class VideoWriter(object):
     #class perpose for writing raw image data to ffmpeg buffer
     CONFIG={
-        'video_file':'temp',
+        'video_file':'temp.mp4',
         'video_dir':'plotlib_video',
         'initial_dir':os.getcwd(),
-        'vcodec':'libx264'
+        'vcodec':'libx264',
+        'audio_file':'temp.mp3',
     }
     
     
-    def __init__(self,video_file,**kwargs):
+
+    
+    def __init__(self,video_file=None,**kwargs):
         digest_config(self,kwargs)
         self.process=None
-        self.video_file=video_file
+        if not video_file:
+            self.video_file=video_file
             
             
     def make_video_dir(self):
@@ -29,8 +37,8 @@ class VideoWriter(object):
     
     
     def init_video_file(self, pixel_array, framerate, vcodec=None):
-        os.chdir(self.video_dir)
         self.make_video_dir()
+        os.chdir(self.video_dir)
         if vcodec:
             self.vcodec=vcodec
         if not isinstance(pixel_array, np.ndarray):
@@ -48,7 +56,7 @@ class VideoWriter(object):
     #this method will lie on a  loop and continously writing array to buffer for creating video 
     
     
-    def start_writing(self,pixel_array,framerate):
+    def start_writing(self,pixel_array):
         self.process.stdin.write(
             pixel_array
                 .astype(np.uint8)
@@ -61,23 +69,53 @@ class VideoWriter(object):
         self.process.wait()
     
     
-    def iteratively_writing_frame(self,pixel_array:np.ndarray, number_of_frame:int, framerate:int, vcodec=None):
-        self.init_video_file(self,pixel_array, framerate, vcodec)
-        for frame in ProcessBar(np.arange(number_of_frame)):
-            self.start_writing(pixel_array,framerate)
-        self.finish_writing()
-        
-        
         
         
     def play_interpolate(self,generating_func,alpha_array,a,b,framerate,grid=True,axis=True,vcodec=None):
         func_data=GraphingTool()
         self.init_video_file(func_data.func_to_buffer(*generating_func(alpha_array[0]),a,b,grid,axis),framerate)
         for f_x,f_y in ProcessBar(map_func_array(generating_func,alpha_array)):
-            self.start_writing(func_data.func_to_buffer(f_x,f_y,a,b,grid,axis),framerate)
+            self.start_writing(func_data.func_to_buffer(f_x,f_y,a,b,grid,axis))
         self.finish_writing()
         
         
+    
+    def grab_screen(self,bbox=None):
+        with stout(None):
+            from gi.repository import Gdk
+            window=Gdk.get_default_root_window()
+        width,height=window.get_width(),window.get_height()
+        pixbuf=Gdk.pixbuf_get_from_window(window, 0, 0, width, height)
+        surface=cairo.ImageSurface(cairo.FORMAT_ARGB32,width,height)
+        ctx=cairo.Context(surface)
+        Gdk.cairo_set_source_pixbuf(ctx,pixbuf,0,0)
+        ctx.paint()
+        return cairo_context_to_pixel_array(surface)
+          
+    def audio_process(self):
+        self.audio_process=subprocess.Popen(["sox","-t","pulseaudio","alsa_output.pci-0000_00_1b.0.analog-stereo.monitor","-t","mp3","temp.mp3"],stdout=subprocess.DEVNULL,shell=True)
+
+
+    def terminate_audio(self):
+        self.audio_process.kill()
+
+
+
+    def record_screen(self,time_laps,framerate=20,audio=True):
+        pix_array=self.grab_screen()
+        self.init_video_file(pix_array,framerate)
+        if audio:
+            with stout(None):
+                self.audio_process()
+        for frame in ProcessBar(np.arange(framerate*time_laps)):
+            self.start_writing(self.grab_screen())
+            time.sleep(1/framerate)
+        self.finish_writing()
+        if audio:
+            self.terminate_audio()
+            
+
+
 
     def view_video(self,file_name):
         os.system('xdg-open {}'.format(file_name))#only of linux
