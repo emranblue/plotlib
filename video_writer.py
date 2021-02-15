@@ -6,7 +6,8 @@ from tqdm import tqdm as ProcessBar
 from plotlib.rate_func import map_func_array,cairo_context_to_pixel_array
 from multiprocessing import Process
 from contextlib import redirect_stdout as stout
-
+from gi.repository import Gdk
+from plotlib.image import array2cairo,cairo2array,init_cairo_surface
 
 class VideoWriter(object):
     #class perpose for writing raw image data to ffmpeg buffer
@@ -80,20 +81,30 @@ class VideoWriter(object):
         
         
     
-    def grab_screen(self,bbox=None):
-        with stout(None):
-            from gi.repository import Gdk
-            window=Gdk.get_default_root_window()
-        width,height=window.get_width(),window.get_height()
-        pixbuf=Gdk.pixbuf_get_from_window(window, 0, 0, width, height)
-        surface=cairo.ImageSurface(cairo.FORMAT_ARGB32,width,height)
+    def grab_screen(self,box):
+        window=Gdk.get_default_root_window()
+        if not box:
+            x0,y0,width,height=window.get_geometry()           
+        else:
+            x0,y0,width,height=box
+            
+        surface=init_cairo_surface(width-x0,height-y0)
         ctx=cairo.Context(surface)
-        Gdk.cairo_set_source_pixbuf(ctx,pixbuf,0,0)
+        ctx.set_source_surface(window.cairo_create().get_target())
         ctx.paint()
-        return cairo_context_to_pixel_array(surface)
+        return cairo2array(surface)
           
     def audio_process(self):
-        self.audio_process=subprocess.Popen(["sox","-t","pulseaudio","alsa_output.pci-0000_00_1b.0.analog-stereo.monitor","-t","mp3","temp.mp3"],stdout=subprocess.DEVNULL,shell=True)
+        
+        self.audio_process=subprocess.Popen(["sox",
+        "-t",
+        "pulseaudio",
+        "alsa_output.pci-0000_00_1b.0.analog-stereo.monitor",
+        "-t",
+        "mp3",
+        "temp.mp3"],
+        stdout=subprocess.DEVNULL,
+        shell=True)
 
 
     def terminate_audio(self):
@@ -101,14 +112,14 @@ class VideoWriter(object):
 
 
 
-    def record_screen(self,time_laps,framerate=20,audio=True):
-        pix_array=self.grab_screen()
+    def record_screen(self,time_laps,box=None,framerate=30,audio=False):
+        pix_array=self.grab_screen(box)
         self.init_video_file(pix_array,framerate)
         if audio:
             with stout(None):
                 self.audio_process()
         for frame in ProcessBar(np.arange(framerate*time_laps)):
-            self.start_writing(self.grab_screen())
+            self.start_writing(self.grab_screen(box))
             time.sleep(1/framerate)
         self.finish_writing()
         if audio:

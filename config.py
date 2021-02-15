@@ -1,5 +1,5 @@
 
-###this module is form 3b1b manim library 
+###this module is from 3b1b manim library 
 # used for localizing CONFIG dict to local variable
 
 
