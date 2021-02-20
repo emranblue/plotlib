@@ -69,8 +69,8 @@ class VideoWriter(object):
     #this method will lie on a  loop and continously writing array to buffer for creating video 
     
     
-    def start_writing(self,pixel_array,invert=False):
-        if invert:
+    def start_writing(self,pixel_array,invert_=False):
+        if invert_:
             pixel_array=invert(pixel_array)
         self.process.stdin.write(
             pixel_array
@@ -187,7 +187,9 @@ class VideoWriter(object):
         return name.split('.')[0]+'_meme.'+name.split('.')[1]
 
 
-    def meme(self,video_file,caption='',width=80,color=[1,1,1,1],direction='down',border=30,font="Courier New",view=True,invert=False):
+    def meme(self,video_file,caption='',width=80,color=[1,1,1,1],direction='down',border=30,font="Courier New",font_size=36,view=True,invert=False):
+    
+        self.video_file=self.get_meme_name(video_file)
         cap=cv2.VideoCapture(str(video_file))
         fps=int(cap.get(cv2.CAP_PROP_FPS))
         frame_num=int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -200,7 +202,7 @@ class VideoWriter(object):
         pixel_array=np.array(im)
         processbar=ProcessBar(total=frame_num)
         self.init_video_file(pixel_array,fps,width=pixel_array.shape[1],height=pixel_array.shape[0])
-        self.start_writing(meme2array(pixel_array,caption,width,color,direction,border,font),invert)
+        self.start_writing(meme2array(pixel_array,caption,width,color,direction,border,font,font_size),invert)
         processbar.update(1)
         while cap.isOpened():
             status,pixel_array=cap.read()
@@ -208,7 +210,7 @@ class VideoWriter(object):
                 im=Image.fromarray(pixel_array)
                 im.putalpha(256)
                 pixel_array=np.array(im)
-                modified_pixel_array=meme2array(pixel_array,caption,width,color,direction,border,font)
+                modified_pixel_array=meme2array(pixel_array,caption,width,color,direction,border,font,font_size)
                 self.start_writing(modified_pixel_array,invert)
                 processbar.update(1)
             else:

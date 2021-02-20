@@ -2,7 +2,7 @@
 from image import *
 
 
-def modify_pixel(pixel_array,text,color,x0,y0,x,y,direction,border,font="Courier New"):
+def modify_pixel(pixel_array,text,color,x0,y0,x,y,direction,border,font,font_size):
     if direction=='down':
         y0,y=y,y0
     surface=array2cairo(pixel_array)
@@ -13,7 +13,7 @@ def modify_pixel(pixel_array,text,color,x0,y0,x,y,direction,border,font="Courier
     ctx.set_source_rgba(*invert_color(color))
     ctx.select_font_face(font, cairo.FONT_SLANT_NORMAL, 
         cairo.FONT_WEIGHT_NORMAL)
-    ctx.set_font_size(36)
+    ctx.set_font_size(font_size)
     
     _, _, width, height,_,_= ctx.text_extents(text)
     height+=border
@@ -40,11 +40,11 @@ def meme_template(image,text,width=80,color=[1,1,1,1],direction='down',border=20
         array2image(modify_pixel(pixel_array,text,color,0,pixel_array.shape[1],pixel_array.shape[0],pixel_array.shape[1]-width,direction,border),file_name)
 
 
-def meme2array(pixel_array,text,width=80,color=[1,1,1,1],direction='down',border=30,font="Courier New"):
+def meme2array(pixel_array,text,width=80,color=[1,1,1,1],direction='down',border=30,font="Courier New",font_size=36):
     if direction =='up':
-        return modify_pixel(pixel_array,text,color,0,0,pixel_array.shape[0],width,direction,border,font)
+        return modify_pixel(pixel_array,text,color,0,0,pixel_array.shape[0],width,direction,border,font,font_size)
     elif direction=='down':
-        return modify_pixel(pixel_array,text,color,0,pixel_array.shape[0],pixel_array.shape[1],pixel_array.shape[0]-width,direction,border,font)
+        return modify_pixel(pixel_array,text,color,0,pixel_array.shape[0],pixel_array.shape[1],pixel_array.shape[0]-width,direction,border,font,font_size)
 
 
 
