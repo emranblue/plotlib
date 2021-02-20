@@ -38,7 +38,17 @@ def meme_template(image,text,width=80,color=[1,1,1,1],direction='up',border=20,f
         array2image(modify_pixel(pixel_array,text,color,0,0,pixel_array.shape[0],width,direction,border),file_name)
     elif direction=='down':
         array2image(modify_pixel(pixel_array,text,color,0,pixel_array.shape[1],pixel_array.shape[0],pixel_array.shape[1]-width,direction,border),file_name)
-       
+
+
+def meme2array(pixel_array,text,width=80,color=[1,1,1,1],direction='up',border=20):
+    if direction =='up':
+        return modify_pixel(pixel_array,text,color,0,0,pixel_array.shape[0],width,direction,border)
+    elif direction=='down':
+        return modify_pixel(pixel_array,text,color,0,pixel_array.shape[1],pixel_array.shape[0],pixel_array.shape[1]-width,direction,border)
+
+
+
+
        
 
   

@@ -4,7 +4,10 @@ from platform import system
 
 def init_cairo_surface(width,height):
     return cairo.ImageSurface(cairo.FORMAT_ARGB32,width,height)
-    
+
+def cairo_create(width,height):
+    return cairo.Context(init_cairo_surface(width,height))
+
 def cairo2array(surface):
     return cairo_context_to_pixel_array(surface)
     
@@ -76,7 +79,7 @@ def apply_mat2image(image,matrix):
 def invert(image):
     if isinstance(image,str):
         pixel_array=image2array(image)
-    elif isinstance(image,np.ndarray):
+    elif isinstance(image,np.ndarray) or isinstance(image,np.array):
         pixel_array=image
     return np.array([255,255,255,2*255]-pixel_array,dtype=np.uint8)
 
