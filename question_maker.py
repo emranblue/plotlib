@@ -21,7 +21,7 @@ def make_tex(number_of_q,tex_file,image_dir):
 
 def compile_tex(number_of_q,tex_file="Question",image_dir=None):
     make_tex(number_of_q,tex_file,image_dir)
-    status=os.system("xelatex {}.tex".format(tex_file))
+    status=os.system("xelatex {}.tex > /dev/null".format(tex_file))
     if not status:
         os.system("xdg-open {}.pdf".format(tex_file))
     else:
