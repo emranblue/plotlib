@@ -1,8 +1,7 @@
 import os
-
-
 def init_tex(tex_file,image_dir):
-    os.chdir(image_dir)
+    if image_dir is not None:
+        os.chdir(image_dir)
     tex=open(tex_file+'.tex','w')
     tex.write("\\documentclass[12pt]{article}\n")
     tex.write("\\usepackage{graphicx}\n")
@@ -14,15 +13,16 @@ def init_tex(tex_file,image_dir):
 def make_tex(number_of_q,tex_file,image_dir):
     tex=init_tex(tex_file,image_dir)
     for i in range(1,number_of_q+1):
-        tex.write(f"\\includegraphics[width=1.0\textwidth]{i}\n")
+        tex.write("\\includegraphics[width=1.0\\textwidth]{"+str(i)+"}\n")
+        tex.write("\\newline\n")
     tex.write("\\end{figure}\n")
     tex.write("\\end{document}")
     tex.close()
 
-def compile_tex(number_of_q,tex_file,image_dir):
+def compile_tex(number_of_q,tex_file="Question",image_dir=None):
     make_tex(number_of_q,tex_file,image_dir)
-    status=os.system(f"xelatex {tex_file}.tex")
+    status=os.system("xelatex {}.tex".format(tex_file))
     if not status:
-        os.system(f"xdg-open {tex_file}.pdf")
+        os.system("xdg-open {}.pdf".format(tex_file))
     else:
         print("tex file error")
