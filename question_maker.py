@@ -39,7 +39,6 @@ def init_tex(tex_file,image_dir,title,time):
     tex.write("\\author{time-"+time+"}\n")
     tex.write("\\begin{document}\n")
     tex.write("\\maketitle\n")
-   #tex.write("\\begin{figure}[ht]\n")
     return iter_list,tex
 
 
@@ -71,6 +70,6 @@ def compile_tex(title,time,tex_file=None,image_dir=None,remove=False,tex_remove=
         os.system("xdg-open {}.pdf > /dev/null".format(tex_file))
     else:
         print("tex file error")
-    
     if remove:
         remove_all()
+

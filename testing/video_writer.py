@@ -6,13 +6,16 @@ from tqdm import tqdm as ProcessBar
 from rate_func import map_func_array,cairo_context_to_pixel_array
 from multiprocessing import Process
 from contextlib import redirect_stdout as stout
-from image import array2cairo,cairo2array,init_cairo_surface,cairo_create,invert
+from image import array2cairo,cairo2array,init_cairo_surface,cairo_create,invert,setalpha
 from pyautogui import screenshot
 from meme import meme2array
 import cv2
 from platform import system
 from PIL import Image
 from file_tracker import FileManager
+
+
+
 class VideoWriter(object):
     #class perpose for writing raw image data to ffmpeg buffer
     CONFIG={
@@ -47,7 +50,7 @@ class VideoWriter(object):
     #take numpy array as input then write that array to ffmpeg buffer,
     
     
-    def init_video_file(self, pixel_array, framerate, width=None, height=None,vcodec=None,pixel_format=None):
+    def init_video_file(self, pixel_array, framerate=25, width=None, height=None,vcodec=None,pixel_format=None):
         self.make_video_dir()
         os.chdir(self.video_dir)
         self.rename()
@@ -57,6 +60,8 @@ class VideoWriter(object):
             pixel_array = np.asarray(pixel_array)
         if not width:
             width,height,_= pixel_array.shape
+        if width<height:
+            width,height=height,width
         self.process = (
             ffmpeg
                 .input('pipe:', format='rawvideo', pix_fmt=self.pixel_format, s='{}x{}'.format(width, height))
@@ -175,6 +180,27 @@ class VideoWriter(object):
             self.terminate_audio()
             
 
+    def record_dev(self,device=0,fps=25):
+        cap=cv2.VideoCapture(device)
+        status,frame=cap.read()
+        assert status
+        print('Video framerate: ',fps)
+        print("\nWriting to FFMPEG buffer...\n")
+        processbar=ProcessBar()
+        self.init_video_file(setalpha(frame),fps)
+        processbar.update(1)
+        while cap.isOpened():
+            status,frame=cap.read()
+            if status:
+                self.start_writing(setalpha(frame))
+                processbar.update(1)
+            else:
+                self.finish_writing()
+                processbar.close()
+                break
+        print("\nfinish writing")
+                
+
 
 
     def view_video(self):
@@ -197,19 +223,15 @@ class VideoWriter(object):
         print('Number of Frame: ',frame_num)
         print("\nWriting to FFMPEG buffer...\n")
         status,pixel_array=cap.read()
-        im=Image.fromarray(pixel_array)
-        im.putalpha(256)
-        pixel_array=np.array(im)
+        pixel_array=setalpha(pixel_array)
         processbar=ProcessBar(total=frame_num)
-        self.init_video_file(pixel_array,fps,width=pixel_array.shape[1],height=pixel_array.shape[0])
+        self.init_video_file(pixel_array,fps)
         self.start_writing(meme2array(pixel_array,caption,width,color,direction,border,font,font_size),invert)
         processbar.update(1)
         while cap.isOpened():
             status,pixel_array=cap.read()
             if status:
-                im=Image.fromarray(pixel_array)
-                im.putalpha(256)
-                pixel_array=np.array(im)
+                pixel_array=setalpha(pixel_array)
                 modified_pixel_array=meme2array(pixel_array,caption,width,color,direction,border,font,font_size)
                 self.start_writing(modified_pixel_array,invert)
                 processbar.update(1)
@@ -218,6 +240,9 @@ class VideoWriter(object):
         self.finish_writing(view)
         processbar.close()
         print("\nFinish Writing.")
+        
+        
+        
         
 
 

@@ -1,6 +1,13 @@
 import cairo,os,sys
 import numpy as np
 from platform import system
+from PIL import Image
+
+
+def setalpha(frame,alpha=255):
+    im=Image.fromarray(frame)
+    im.putalpha(alpha)
+    return np.array(im)
 
 def init_cairo_surface(width,height):
     return cairo.ImageSurface(cairo.FORMAT_ARGB32,width,height)
