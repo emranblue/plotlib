@@ -1,5 +1,5 @@
 import numpy as np
-from plotlib.constant import size
+from constant import size
 
 def sigmoid(x):
     return ((2/(1+np.exp(-x)))-1)*10

@@ -1,6 +1,13 @@
 import cairo,os,sys
 import numpy as np
 from platform import system
+from PIL import Image
+
+
+def setalpha(frame,alpha=255):
+    im=Image.fromarray(frame)
+    im.putalpha(alpha)
+    return np.array(im)
 
 def init_cairo_surface(width,height):
     return cairo.ImageSurface(cairo.FORMAT_ARGB32,width,height)
@@ -18,7 +25,7 @@ def cairo2image(surface):
     array2image(cairo2array(surface))
     
 def array2cairo(pixel_array):
-    return cairo.ImageSurface.create_for_data(pixel_array,cairo.FORMAT_ARGB32,*[inf for inf in pixel_array.shape[0:2]])
+    return cairo.ImageSurface.create_for_data(pixel_array,cairo.FORMAT_ARGB32,pixel_array.shape[1],pixel_array.shape[0])
     
 def image2array(image,full=False):
     if full:
@@ -44,23 +51,24 @@ def add2image(image,n,alpha):
 def add_vec2image(image,vector,alpha=0):
     array2image((image2array(image)+[*vector,alpha]).astype(np.uint8))
     
-def apply_mat2array(image,matrix):
+def apply_mat2array(pixel_array,matrix):
     assert len(matrix)==4
     matrix=np.array(matrix)
-    pixel_array=image2array(image)
+    #pixel_array=image2array(image)
     width,height=pixel_array.shape[0:2]
     for i in np.arange(width):
         for j in np.arange(height):
             pixel_array[i,j]=(np.matmul(matrix,pixel_array[i,j])%256).astype(np.uint8) 
     return pixel_array  
     
-def apply_matrix2image(image,matrix,x0=0,y0=0):
-    pixel_array=image2array(image)
+def apply_matrix2image(pixel_array,matrix,x0=0.0,y0=0.0):
+    pixel_array=np.array(pixel_array)
+    matrix=np.array(matrix)
     surface=init_cairo_surface(*pixel_array.shape[0:2])
     matrix=cairo.Matrix(*matrix,x0,y0)
     ctx=cairo.Context(surface)
     ctx.transform(matrix)
-    ctx.set_source_surface(image2cairo(image))
+    ctx.set_source_surface(array2cairo(pixel_array))
     ctx.paint()
     return cairo2array(surface)
     

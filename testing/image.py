@@ -51,23 +51,24 @@ def add2image(image,n,alpha):
 def add_vec2image(image,vector,alpha=0):
     array2image((image2array(image)+[*vector,alpha]).astype(np.uint8))
     
-def apply_mat2array(image,matrix):
+def apply_mat2array(pixel_array,matrix):
     assert len(matrix)==4
     matrix=np.array(matrix)
-    pixel_array=image2array(image)
+    #pixel_array=image2array(image)
     width,height=pixel_array.shape[0:2]
     for i in np.arange(width):
         for j in np.arange(height):
             pixel_array[i,j]=(np.matmul(matrix,pixel_array[i,j])%256).astype(np.uint8) 
     return pixel_array  
     
-def apply_matrix2image(image,matrix,x0=0,y0=0):
-    pixel_array=image2array(image)
+def apply_matrix2image(pixel_array,matrix,x0=0.0,y0=0.0):
+    pixel_array=np.array(pixel_array)
+    matrix=np.array(matrix)
     surface=init_cairo_surface(*pixel_array.shape[0:2])
     matrix=cairo.Matrix(*matrix,x0,y0)
     ctx=cairo.Context(surface)
     ctx.transform(matrix)
-    ctx.set_source_surface(image2cairo(image))
+    ctx.set_source_surface(array2cairo(pixel_array))
     ctx.paint()
     return cairo2array(surface)
     

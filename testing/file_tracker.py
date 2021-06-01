@@ -1,59 +1,82 @@
-import os
+import os,shutil
 from config import digest_config
 from platform import system
 class FileManager:
     CONFIG={
-        'fmt':None,
-        'dir_name':None,
-        'file_name':None,
+        'dirname':None,
+        'filename':None,
+        'rootpath':os.getcwd(),
+        'extent':'_plotlib',
     }
 
-    def __init__(self,fmt,dir_name,file_name,**kwargs):
+    def __init__(self,dirname=None,filename=None,audiofile=None,**kwargs):
         digest_config(self,kwargs)
-        if fmt:
-            self.setfmt(fmt)
-        if file_name:
-            self.setfilename(file_name)
-        if dir_name:
-            self.setdirname(dir_name)
-        path=os.path.join(os.getcwd(),self.dir_name)
-        if not os.path.exists(path):
-            os.mkdir(self.dir_name)
-        self.setpath(path)
+        self.dirname=self.name() if not self.dirname else self.dirname
+        if filename is not None:
+            self.setfilename(filename)
+        if dirname:
+            self.setdirname(dirname)
+        self.path=os.path.join(self.rootpath,self.dirname)
+        if not os.path.exists(self.path):
+            os.chdir(self.rootpath)
+            os.mkdir(self.dirname)
+        if self.audiofile:
+            self.sendtopath(self.audiofile)
+        self.newfile()
 
     def getfilepath(self):
         return self.path
+        
+    def sendtopath(self,files):
+        shutil.move(files,os.path.join(self.path,files))
+        
+    def gopath(self):
+        os.chdir(self.path)
 
     def setpath(self,name:str):
         self.path=name
 
     def getfilename(self)->str:
-        return self.file_name
+        return self.filename
 
     def setfilename(self,name:str):
-        self.file_name=name  
+        self.filename=name  
 
     def setdirname(self,name:str):
-        self.dir_name=name
+        self.dirname=name
 
-    def setfmt(self,name:str):
-        self.fmt=name
 
     def getdirname(self)->str:
-        return self.dir_name
+        return self.dirname
+    
+    def getextn(self):
+        extn=self.filename.split('.')[-1]
+        if extn==self.getbase():
+            return ".mp4"
+        else:
+            return '.'+extn
+        
+    def getbase(self):
+        return self.filename.split('.')[0]
+        
+        
+    def name(self):
+        return self.__class__.__name__
 
             
     def newfile(self)->str:
-        extn='.'+self.fmt
         flist=os.listdir(self.path)
+        self.filename=self.getbase()+self.extent+self.getextn()
+        if not self.filename in flist:
+            return self.filename
         i=0
         while True:
-            if self.file_name+str(i)+extn in flist:
+            if self.getbase()+str(i)+self.getextn() in flist:
                 i+=1
             else:
                 break    
-        self.file_name=self.file_name+str(i)+extn            
-        return self.file_name
+        self.filename=self.getbase()+str(i)+self.getextn()            
+        return self.filename
 
 
     @classmethod
@@ -73,36 +96,15 @@ class FileManager:
         file_name=file_name+str(i)+extn            
         return file_name
 	    
-
-    def savefile(self,surface):
-        if self.fmt=='png':
-            surface.write_to_png(os.path.join(self.path,self.newfile()))
-        elif self.fmt=='svg':
-            surface.finish()
     
         
 
-    def view(self):
+    def show(self):
         os.chdir(self.path)
-        assert os.path.exists(self.file_name)
+        assert os.path.exists(self.filename)
         if system()=='Linux':
-            os.system('xdg-open {}'.format(self.file_name))#only available in linux os
+            os.system('xdg-open {}'.format(self.filename))#only available in linux os
         else:
-            print("Go to {}".format(self.path/self.dir_name))
+            print("Go to {}".format(self.path/self.dirname))
 
-
-    def removefile(self,name):
-        os.chdir(self.path)
-        if len(os.listdir()):
-            if name.isdigit():
-                os.remove(self.file_name+name+'.'+self.fmt)
-            elif name=='all' or name=="*":
-                os.system('rm *.{}'.format(self.fmt))
-            print('deleted')
-        else:
-            print('empty folder') 
-
-
-    def listdir(self):
-        os.chdir(self.path)
-        os.system('ls')         
+       

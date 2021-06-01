@@ -25,7 +25,7 @@ class GraphingTool(FileManager,PerametricFunction):
         'dir_name':'temp',
         'file_name':'temp'
     }
-    def __init__(self,fmt='png',dir_name='temp',file_name='temp.png',**kwargs):       
+    def __init__(self,fmt=None,dir_name=None,file_name=None,**kwargs):       
         digest_config(self,kwargs)
         if not [fmt,dir_name,file_name]==[None]*3:
             self.fmt,self.dir_name,self.file_name=fmt,dir_name,file_name
